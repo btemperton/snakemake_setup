@@ -1,12 +1,15 @@
 {
   "__default__" :
   {
-    "project": "Research_Project-172179"
-  },
-  "setup" :
-  {
-    "queue": "stq",
+    "project": "Research_Project-172179",
+    "queue": "sq",
     "walltime": "00:01:00",
     "threads": "1"
+  },
+  "test_conda" :
+  {
+    "queue": "pq",
+    "walltime": "00:01:00",
+    "threads": "16"
   }
 }

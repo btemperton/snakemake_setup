@@ -3,11 +3,27 @@ configfile: "config.yaml"
 #It is NOT the inputs to each job...
 #For this example, there is no input
 
+#We need a cluster.json script to define the parameters to use for our cluster
+#Note, in this file, the __default__ rule appears to override all other rules
+#This is not the behaviour I was expecting (I thought the rules would override the default)
+
+#Note, we also have to use a custom jobscript, called custom_jobscript.sh
+#You are supposed to be able to use --use-conda to initiate a conda environment
+#from the env/env.yaml file
+#However, on our servers, it can't find conda if you do this. The only way
+#I've found to get round it is to create a custom job script that as its first lines
+#initiates conda and then activates the conda environment. This is not ideal.
+
+
 #we can use this to run the following for clustering:
-#snakemake --jobs 1 --cluster-config cluster.json --cluster "qsub -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
+#snakemake --jobs 1 --jobscript custom_jobscript.sh --cluster-config cluster.json --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
+
+
+
+
 rule all:
     input:
-        expand("{sample}.new.txt", sample=config["samples"])
+        expand("{sample}.minimap.txt", sample=config["samples"])
 
 rule setup:
     output:
@@ -16,3 +32,11 @@ rule setup:
         "envs/test.yaml"
     shell:
         "echo hello > {output}"
+
+rule test_conda:
+    input:
+        rules.setup.output
+    output:
+        "{sample}.minimap.txt",
+    shell:
+        "minimap2 --version > {output}"
