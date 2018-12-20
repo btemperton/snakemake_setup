@@ -4,8 +4,7 @@ configfile: "config.yaml"
 #For this example, there is no input
 
 #We need a cluster.json script to define the parameters to use for our cluster
-#Note, in this file, the __default__ rule appears to override all other rules
-#This is not the behaviour I was expecting (I thought the rules would override the default)
+#This defines the walltime, queue and research project for each rule
 
 #Note, we also have to use a custom jobscript, called custom_jobscript.sh
 #You are supposed to be able to use --use-conda to initiate a conda environment
