@@ -1,7 +1,5 @@
 configfile: "config.yaml"
-#This is simply a list of the outputs that are going to be needed for each element in the config file
-#It is NOT the inputs to each job...
-#For this example, there is no input
+
 
 #We need a cluster.json script to define the parameters to use for our cluster
 #This defines the walltime, queue and research project for each rule
@@ -15,10 +13,13 @@ configfile: "config.yaml"
 
 
 #we can use this to run the following for clustering:
-#snakemake --jobs 1 --jobscript custom_jobscript.sh --cluster-config cluster.json --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
+#snakemake --jobs 2 --jobscript custom_jobscript.sh --cluster-config cluster.json --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
 
+#This is simply a list of the outputs that are going to be needed for each element in the config file
+#It is NOT the inputs to each job...
+#For this example, there is no input
 
-
+#localrules: all, setup
 
 rule all:
     input:
@@ -35,7 +36,9 @@ rule setup:
 rule test_conda:
     input:
         rules.setup.output
+    conda:
+        "envs/test.yaml"
     output:
-        "{sample}.minimap.txt",
+        "{sample}.minimap.txt"
     shell:
         "minimap2 --version > {output}"

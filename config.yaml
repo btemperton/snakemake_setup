@@ -1,2 +1,6 @@
 samples:
-  hello
+  - hello
+  - world
+  - This
+  - may
+  - work
