@@ -1,6 +1,2 @@
-samples:
-  - hello
-  - world
-  - This
-  - may
-  - work
+#All info from https://www.nature.com/articles/sdata2018176/tables/3#search-menu
+samples: "samples.tsv"

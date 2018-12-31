@@ -1,44 +1,84 @@
+###
+#Run with the following:
+#snakemake --jobs 100 \
+#  --jobscript custom_jobscript.sh \
+#  --cluster-config cluster.json \
+#  --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
+
+# BATS samples are found at: https://www.imicrobe.us/#/projects/276
+
+###
+import pandas as pd
 configfile: "config.yaml"
+samples = pd.read_table(config["samples"]).set_index("sample")
 
-
-#We need a cluster.json script to define the parameters to use for our cluster
-#This defines the walltime, queue and research project for each rule
-
-#Note, we also have to use a custom jobscript, called custom_jobscript.sh
-#You are supposed to be able to use --use-conda to initiate a conda environment
-#from the env/env.yaml file
-#However, on our servers, it can't find conda if you do this. The only way
-#I've found to get round it is to create a custom job script that as its first lines
-#initiates conda and then activates the conda environment. This is not ideal.
-
-
-#we can use this to run the following for clustering:
-#snakemake --jobs 2 --jobscript custom_jobscript.sh --cluster-config cluster.json --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
-
-#This is simply a list of the outputs that are going to be needed for each element in the config file
-#It is NOT the inputs to each job...
-#For this example, there is no input
-
-#localrules: all, setup
+print(samples)
 
 rule all:
     input:
-        expand("{sample}.minimap.txt", sample=config["samples"])
+        expand(["samples/{sample}/{sample}.fwd.fq.bz2",
+				"samples/{sample}/{sample}.rev.fq.bz2",
+				"samples/{sample}/{sample}.contigs.fa.gz",
+				"samples/{sample}/{sample}.contigs.10k.fa.gz"],
+				sample=samples.index)
 
-rule setup:
-    output:
-        "{sample}.new.txt"
-    conda:
-        "envs/test.yaml"
-    shell:
-        "echo hello > {output}"
+rule download_fwd:
+	output:
+		"samples/{sample}/{sample}.fwd.fq.bz2"
+	params:
+		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.fwd[wildcards.sample],
+		basename = lambda wildcards: samples.fwd[wildcards.sample]
+	benchmark:
+		"logs/{sample}/download_fwd.bmk"
+	conda:
+		"envs/test.yaml"
+	shell:
+		"""
+		iget -K {params.url};
+		mv {params.basename} {output}
+		"""
 
-rule test_conda:
-    input:
-        rules.setup.output
-    conda:
-        "envs/test.yaml"
-    output:
-        "{sample}.minimap.txt"
-    shell:
-        "minimap2 --version > {output}"
+rule download_rev:
+	output:
+		"samples/{sample}/{sample}.rev.fq.bz2"
+	params:
+		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.rev[wildcards.sample],
+		basename = lambda wildcards: samples.rev[wildcards.sample]
+	benchmark:
+		"logs/{sample}/download_rev.bmk"
+	conda:
+		"envs/test.yaml"
+	shell:
+		"""
+		iget -K {params.url};
+		mv {params.basename} {output}
+		"""
+rule download_contigs:
+	output:
+		"samples/{sample}/{sample}.contigs.fa.gz"
+	params:
+		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.contigs[wildcards.sample],
+		basename = lambda wildcards: samples.contigs[wildcards.sample]
+	benchmark:
+		"logs/{sample}/download_contigs.bmk"
+	conda:
+		"envs/test.yaml"
+	shell:
+		"""
+		iget -K {params.url};
+		mv {params.basename} {output}
+		"""
+
+rule size_filter_contigs:
+	input:
+		rules.download_contigs.output
+	output:
+		"samples/{sample}/{sample}.contigs.10k.fa.gz"
+	benchmark:
+		"logs/{sample}/size_filter_contigs.bmk"
+	conda:
+		"envs/test.yaml"
+	shell:
+		"""
+		seqtk seq -L 10000 -N -U {input} | gzip -c > {output}
+		"""

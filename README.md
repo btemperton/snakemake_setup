@@ -15,7 +15,7 @@ The downside is that you will need to change the `custom_jobscript.sh` to point 
 You can then get it to submit jobs to the server by running:
 
 ```
-snakemake --jobs 2 \
+snakemake --jobs 100 \
   --jobscript custom_jobscript.sh \
   --cluster-config cluster.json \
   --cluster "msub -V -l walltime={cluster.walltime},nodes=1:ppn={cluster.threads} -q {cluster.queue} -A {cluster.project} -j oe"
@@ -30,3 +30,7 @@ Once the first two samples are complete, it will move on to the next two and rep
 You'll notice on line 22 of the `Snakefile`, you can specify which rules you want to run locally, and which ones you want to turn into cluster jobs. If you uncomment this line, the `setup` rule will be run locally and only the `test_conda` rule will create a cluster job.
 
 It's a pretty cool tool for creating reproducible computational pipelines.
+
+## Test Case
+
+For this test case, we will use Snakemake to analyse the viral content of the [Biller et al metagenomes](https://www.nature.com/articles/sdata2018176) 

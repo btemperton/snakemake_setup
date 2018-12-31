@@ -3,13 +3,7 @@
   {
     "project": "Research_Project-172179",
     "queue": "sq",
-    "walltime": "00:01:00",
+    "walltime": "01:00:00",
     "threads": "1"
-  },
-  "test_conda" :
-  {
-    "queue": "pq",
-    "walltime": "00:01:00",
-    "threads": "16"
   }
 }
