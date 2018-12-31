@@ -33,4 +33,8 @@ It's a pretty cool tool for creating reproducible computational pipelines.
 
 ## Test Case
 
-For this test case, we will use Snakemake to analyse the viral content of the [Biller et al metagenomes](https://www.nature.com/articles/sdata2018176) 
+For this test case, we will use Snakemake to analyse the viral content of the [Biller et al metagenomes](https://www.nature.com/articles/sdata2018176).
+
+This assumes the following is installed:
+
+* `iCommands` for downloading files from iMicrobes.

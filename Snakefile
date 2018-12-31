@@ -12,8 +12,6 @@ import pandas as pd
 configfile: "config.yaml"
 samples = pd.read_table(config["samples"]).set_index("sample")
 
-print(samples)
-
 rule all:
     input:
         expand(["samples/{sample}/{sample}.fwd.fq.bz2",
@@ -55,7 +53,7 @@ rule download_rev:
 		"""
 rule download_contigs:
 	output:
-		"samples/{sample}/{sample}.contigs.fa.gz"
+		temp("samples/{sample}/{sample}.contigs.fa.gz")
 	params:
 		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.contigs[wildcards.sample],
 		basename = lambda wildcards: samples.contigs[wildcards.sample]
@@ -74,11 +72,11 @@ rule size_filter_contigs:
 		rules.download_contigs.output
 	output:
 		"samples/{sample}/{sample}.contigs.10k.fa.gz"
+	params:
+		min_len = 10000
 	benchmark:
 		"logs/{sample}/size_filter_contigs.bmk"
 	conda:
 		"envs/test.yaml"
-	shell:
-		"""
-		seqtk seq -L 10000 -N -U {input} | gzip -c > {output}
-		"""
+	script:
+		"scripts/rename_and_size_select.py"
