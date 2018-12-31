@@ -16,7 +16,8 @@ rule all:
     input:
         expand(["samples/{sample}/{sample}.fwd.fq.bz2",
 				"samples/{sample}/{sample}.rev.fq.bz2",
-				"samples/{sample}/{sample}.contigs.10k.fa.gz"],
+	"samples/{sample}/{sample}.contigs.10k.fa.gz",
+	"samples/{sample}/{sample}.virsorter.tgz"],
 				sample=samples.index)
 
 rule download_fwd:
@@ -28,7 +29,7 @@ rule download_fwd:
 	benchmark:
 		"logs/{sample}/download_fwd.bmk"
 	conda:
-		"envs/test.yaml"
+		"envs/biller_virome.yaml"
 	shell:
 		"""
 		iget -K {params.url};
@@ -44,7 +45,7 @@ rule download_rev:
 	benchmark:
 		"logs/{sample}/download_rev.bmk"
 	conda:
-		"envs/test.yaml"
+		"envs/biller_virome.yaml"
 	shell:
 		"""
 		iget -K {params.url};
@@ -59,7 +60,7 @@ rule download_contigs:
 	benchmark:
 		"logs/{sample}/download_contigs.bmk"
 	conda:
-		"envs/test.yaml"
+		"envs/biller_virome.yaml"
 	shell:
 		"""
 		iget -K {params.url};
@@ -76,6 +77,32 @@ rule size_filter_contigs:
 	benchmark:
 		"logs/{sample}/size_filter_contigs.bmk"
 	conda:
-		"envs/test.yaml"
+		"envs/biller_virome.yaml"
 	script:
 		"scripts/rename_and_size_select.py"
+
+rule run_virsorter:
+	input:
+		rules.size_filter_contigs.output
+	output:
+		"samples/{sample}/{sample}.virsorter.tgz"
+	params:
+		data_dir = "/gpfs/ts0/projects/Research_Project-172179/tools/VirSorter/virsorter-data"
+	threads: 16
+	log:
+		"logs/{sample}/{sample}.virsorter.log"
+	script:
+			"""
+		gunzip -c {input} > tmp.{wildcards.sample};
+		wrapper_phage_contigs_sorter_iPlant.pl \
+			-f tmp.{wildcards.sample} \
+			--db 2 \
+			--wdir {wildcards.sample}.virsorter \
+			--ncpu {threads} \
+			--data-dir {params.data_dir} 2>&1 | tee {log};
+
+		tar czf {output} {wildcards.sample}.virsorter;
+		rm -rf tmp.{wildcards.sample}.virsorter
+
+		"""
+

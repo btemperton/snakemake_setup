@@ -38,3 +38,4 @@ For this test case, we will use Snakemake to analyse the viral content of the [B
 This assumes the following is installed:
 
 * `iCommands` for downloading files from iMicrobes.
+* `VirSorter` as described [here](http://merenlab.org/2018/02/08/importing-virsorter-annotations/)

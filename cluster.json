@@ -5,5 +5,10 @@
     "queue": "sq",
     "walltime": "01:00:00",
     "threads": "1"
+  },
+  "run_virsorter": {
+    "queue": "pq",
+    "walltime": "24:00:00",
+    "threads": "16"
   }
 }
