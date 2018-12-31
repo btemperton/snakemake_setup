@@ -16,7 +16,6 @@ rule all:
     input:
         expand(["samples/{sample}/{sample}.fwd.fq.bz2",
 				"samples/{sample}/{sample}.rev.fq.bz2",
-				"samples/{sample}/{sample}.contigs.fa.gz",
 				"samples/{sample}/{sample}.contigs.10k.fa.gz"],
 				sample=samples.index)
 
