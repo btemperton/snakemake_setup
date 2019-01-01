@@ -10,7 +10,7 @@
 ###
 import pandas as pd
 configfile: "config.yaml"
-samples = pd.read_table(config["samples"]).set_index("sample")
+	samples = pd.read_table(config["samples"],  comment='#').set_index("sample")
 
 rule all:
     input:
@@ -91,11 +91,10 @@ rule run_virsorter:
 	threads: 16
 	log:
 		"logs/{sample}/{sample}.virsorter.log"
-	script:
+	shell:
 			"""
 		gunzip -c {input} > tmp.{wildcards.sample};
-		wrapper_phage_contigs_sorter_iPlant.pl \
-			-f tmp.{wildcards.sample} \
+		wrapper_phage_contigs_sorter_iPlant.pl -f tmp.{wildcards.sample} \
 			--db 2 \
 			--wdir {wildcards.sample}.virsorter \
 			--ncpu {threads} \
