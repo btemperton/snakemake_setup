@@ -10,6 +10,7 @@
 ###
 import pandas as pd
 configfile: "config.yaml"
+
 	samples = pd.read_table(config["samples"],  comment='#').set_index("sample")
 
 rule all:
@@ -87,7 +88,7 @@ rule run_virsorter:
 	output:
 		"samples/{sample}/{sample}.virsorter.tgz"
 	params:
-		data_dir = "/gpfs/ts0/projects/Research_Project-172179/tools/VirSorter/virsorter-data"
+		data_dir = "/gpfs/ts0/home/bt273/BIOS-SCOPE/tools/VirSorter/virsorter-data"
 	threads: 16
 	log:
 		"logs/{sample}/{sample}.virsorter.log"
@@ -101,7 +102,8 @@ rule run_virsorter:
 			--data-dir {params.data_dir} 2>&1 | tee {log};
 
 		tar czf {output} {wildcards.sample}.virsorter;
-		rm -rf tmp.{wildcards.sample}.virsorter
+		rm -rf tmp.{wildcards.sample}.virsorter;
+		rm tmp.{wildcards.sample};
 
 		"""
 
