@@ -1,7 +1,7 @@
 {
   "__default__" :
   {
-    "project": "Research_Project-172179",
+    "project": "<SOME RANDOM PROJECT CODE HERE>",
     "queue": "sq",
     "walltime": "03:00:00",
     "threads": "1"
