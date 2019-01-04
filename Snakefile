@@ -15,95 +15,45 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand(["samples/{sample}/{sample}.fwd.fq.bz2",
-				"samples/{sample}/{sample}.rev.fq.bz2",
-	"samples/{sample}/{sample}.contigs.10k.fa.gz",
-	"samples/{sample}/{sample}.virsorter.tgz"],
-				sample=samples.index)
+		expand(["/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{location}/{sample}.fwd.fq.gz",
+	"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{location}/{sample}.rev.fq.gz"],
+	sample=samples.index, location=samples.Location)
 
 rule download_fwd:
 	output:
-		"samples/{sample}/{sample}.fwd.fq.bz2"
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{location}/{sample}.fwd.fq.gz"
 	params:
-		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.fwd[wildcards.sample],
-		basename = lambda wildcards: samples.fwd[wildcards.sample]
-	benchmark:
-		"logs/{sample}/download_fwd.bmk"
-	conda:
-		"envs/biller_virome.yaml"
+		url = lambda wildcards: samples.fwd[wildcards.sample],
 	shell:
-		"""
-		iget -K {params.url};
-		mv {params.basename} {output}
-		"""
+		"wget -O {input} {params.url}"
+
 
 rule download_rev:
 	output:
-		"samples/{sample}/{sample}.rev.fq.bz2"
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{location}/{sample}.rev.fq.gz"
 	params:
-		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.rev[wildcards.sample],
-		basename = lambda wildcards: samples.rev[wildcards.sample]
-	benchmark:
-		"logs/{sample}/download_rev.bmk"
-	conda:
-		"envs/biller_virome.yaml"
+		url = lambda wildcards: samples.rev[wildcards.sample],
 	shell:
-		"""
-		iget -K {params.url};
-		mv {params.basename} {output}
-		"""
+		"wget -O {input} {params.url}"
+
+
 rule download_contigs:
 	output:
-		temp("samples/{sample}/{sample}.contigs.fa.gz")
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/contigs/{location}/{sample}.contigs.fa.gz"
 	params:
-		url = lambda wildcards: samples.dir[wildcards.sample] + "/" + samples.contigs[wildcards.sample],
-		basename = lambda wildcards: samples.contigs[wildcards.sample]
-	benchmark:
-		"logs/{sample}/download_contigs.bmk"
-	conda:
-		"envs/biller_virome.yaml"
+		url = lambda wildcards: samples.contigs[wildcards.sample]
 	shell:
-		"""
-		iget -K {params.url};
-		mv {params.basename} {output}
-		"""
+		"wget -O {input} {params.url}"
 
 rule size_filter_contigs:
 	input:
 		rules.download_contigs.output
 	output:
-		"samples/{sample}/{sample}.contigs.10k.fa.gz"
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/contigs/10k/{location}/{sample}.contigs.10k.fa.gz"
 	params:
 		min_len = 10000
-	benchmark:
-		"logs/{sample}/size_filter_contigs.bmk"
 	conda:
 		"envs/biller_virome.yaml"
 	script:
 		"scripts/rename_and_size_select.py"
-
-rule run_virsorter:
-	input:
-		rules.size_filter_contigs.output
-	output:
-		"samples/{sample}/{sample}.virsorter.tgz"
-	params:
-		data_dir = "/gpfs/ts0/home/bt273/BIOS-SCOPE/tools/VirSorter/virsorter-data"
-	threads: 16
-	log:
-		"logs/{sample}/{sample}.virsorter.log"
-	shell:
-			"""
-		gunzip -c {input} > tmp.{wildcards.sample};
-		wrapper_phage_contigs_sorter_iPlant.pl -f tmp.{wildcards.sample} \
-			--db 2 \
-			--wdir {wildcards.sample}.virsorter \
-			--ncpu {threads} \
-			--data-dir {params.data_dir} 2>&1 | tee {log};
-
-		tar czf {output} {wildcards.sample}.virsorter;
-		rm -rf tmp.{wildcards.sample}.virsorter;
-		rm tmp.{wildcards.sample};
-
-		"""
 
