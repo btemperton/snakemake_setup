@@ -88,7 +88,7 @@ rule run_virsorter:
 	output:
 		"samples/{sample}/{sample}.virsorter.tgz"
 	params:
-		data_dir = "/gpfs/ts0/home/bt273/BIOS-SCOPE/tools/VirSorter/virsorter-data"
+		data_dir = "<path/to/virsorter-data/folder/>"
 	threads: 16
 	log:
 		"logs/{sample}/{sample}.virsorter.log"
