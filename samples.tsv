@@ -1,4 +1,0 @@
-sample	dir	fwd	rev	contigs	depth	site	date
-S0567	/iplant/home/shared/imicrobe/projects/276/samples/5833	S0567_1_sequence.fastq.bz2	S0567_2_sequence.fastq.bz2	S0567.fa.gz	10	BATS	2003-04-22
-# this sample has an issue with downloading the forward reads S0568	/iplant/home/shared/imicrobe/projects/276/samples/5834	S0568_1_sequence.fastq.bz2	S0568_2_sequence.fastq.bz2	S0568.fa.gz	80	BATS	2003-04-22
-S0569	/iplant/home/shared/imicrobe/projects/276/samples/5835	S0569_1_sequence.fastq.bz2	S0569_2_sequence.fastq.bz2	S0569.fa.gz	180	BATS	2003-04-22
