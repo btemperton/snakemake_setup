@@ -6,10 +6,11 @@ selected_reads = []
 
 sample_name = snakemake.wildcards.sample
 counter = 1
-with gzip.open(snakemake.input[0], 'rt') as handle:
+with open(snakemake.input[0], 'rt') as handle:
 	for record in SeqIO.parse(handle, 'fasta'):
 		if len(record.seq) >= int(snakemake.params.min_len):
-			record.id = f"{sample_name}_{counter:07d}"
+			record.id = f"{sample_name}_{counter:07d}_length_{len(record.seq)}"
+			record.description = ''
 			counter += 1
 			selected_reads.append(record)
 

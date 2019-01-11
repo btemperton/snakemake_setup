@@ -17,7 +17,9 @@ rule all:
 	input:
 		expand(["/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.fwd.fq.gz",
 		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.rev.fq.gz",
-		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.fa"], sample=samples.index)
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.fa",
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.10k.fa.gz"], sample=samples.index),
+		"combined_10k.contigs.fa.gz"
 
 rule download_fwd:
 	output:
@@ -42,3 +44,24 @@ rule download_contigs:
 		url = lambda wildcards: samples.contig_download[wildcards.sample]
 	shell:
 		"wget -O {output} {params.url}"
+
+rule rename_and_size_select:
+	input:
+		rules.download_contigs.output
+	output:
+		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.10k.fa.gz"
+	params:
+		min_len = 10000
+	script:
+		"scripts/rename_and_size_select.py"
+
+rule combine_contigs:
+	output:
+		"combined_10k.contigs.fa.gz"
+	shell:
+		"""
+			find /gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/ -name \"*.contigs.10k.fa.gz\" > file_list;
+			for i in $(cat file_list); do cat $i >> tmp; done;
+			mv tmp {output};
+			rm file_list
+		"""
