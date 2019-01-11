@@ -19,7 +19,8 @@ rule all:
 		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.rev.fq.gz",
 		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.fa",
 		"/gpfs/ts0/home/bt273/BIOS-SCOPE/metag/shared_store/biller/reads/{sample}/{sample}.contigs.10k.fa.gz"], sample=samples.index),
-		"combined_10k.contigs.fa.gz"
+		"combined_10k.contigs.fa.gz",
+		"combined.contigs.virsorter.10k.tgz"
 
 rule download_fwd:
 	output:
@@ -64,4 +65,22 @@ rule combine_contigs:
 			for i in $(cat file_list); do cat $i >> tmp; done;
 			mv tmp {output};
 			rm file_list
+		"""
+
+rule run_virsorter:
+	input:
+		rules.combine_contigs.output
+	output:
+		"combined.contigs.virsorter.10k.tgz"
+	params:
+		data_dir = "/gpfs/ts0/home/bt273/BIOS-SCOPE/tools/virsorter-data"
+	threads:
+		16
+	shell:
+		"""
+		gunzip -c {input} > tmp;
+		wrapper_phage_contigs_sorter_iPlant.pl -f tmp --dataset "Biller_VS" --db 2 --wdir tmp.virsorter --ncpu {threads} --data-dir {params.data_dir} --diamond;
+		rm tmp;
+		tar czvf {output} tmp.virsorter;
+		rm -r tmp.virsorter
 		"""
